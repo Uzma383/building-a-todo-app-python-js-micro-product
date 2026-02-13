@@ -1,6 +1,8 @@
+# SOLUTION - app.py (completed)
+
 from flask import Flask, request, jsonify, render_template
 from models import db, User, Todo
-from auth import hash_password, verify_password, create_token, get_current_user
+from auth import hash_password, verify_password, create_token, token_required
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todo.db'
@@ -84,38 +86,24 @@ def login():
 # ============================================
 # TODO API (Protected)
 # ============================================
-# NOTE: In real projects, this repeated check would use a @decorator.
-# We write it explicitly here for learning purposes.
 
 @app.route('/api/todos', methods=['GET'])
-def get_todos():
-    # Step 1: Check if user is logged in
-    current_user, error = get_current_user()
-    if error:
-        return error
-
-    # Step 2: Get user's todos
+@token_required
+def get_todos(current_user):
     todos = Todo.query.filter_by(user_id=current_user.id).all()
     return jsonify({'todos': [todo.to_dict() for todo in todos]})
 
 
 @app.route('/api/todos', methods=['POST'])
-def create_todo():
-    # Step 1: Check if user is logged in
-    current_user, error = get_current_user()
-    if error:
-        return error
-
-    # Step 2: Create todo
+@token_required
+def create_todo(current_user):
     data = request.get_json()
+
     todo = Todo(
         task_content=data['task_content'],
         user_id=current_user.id,
-        # ===========================================
-        # HOMEWORK: Add this line below
-        # ===========================================
-        # priority=data.get('priority', 'medium')
-        # ===========================================
+        # STEP 3: Added priority
+        priority=data.get('priority', 'medium')
     )
 
     db.session.add(todo)
@@ -125,20 +113,13 @@ def create_todo():
 
 
 @app.route('/api/todos/<int:todo_id>', methods=['PUT'])
-def update_todo(todo_id):
-    # Step 1: Check if user is logged in
-    current_user, error = get_current_user()
-    if error:
-        return error
-
-    # Step 2: Find todo
+@token_required
+def update_todo(current_user, todo_id):
     todo = Todo.query.get_or_404(todo_id)
 
-    # Step 3: Check ownership
     if todo.user_id != current_user.id:
         return jsonify({'error': 'Not authorized'}), 403
 
-    # Step 4: Update todo
     data = request.get_json()
     if 'task_content' in data:
         todo.task_content = data['task_content']
@@ -150,20 +131,13 @@ def update_todo(todo_id):
 
 
 @app.route('/api/todos/<int:todo_id>', methods=['DELETE'])
-def delete_todo(todo_id):
-    # Step 1: Check if user is logged in
-    current_user, error = get_current_user()
-    if error:
-        return error
-
-    # Step 2: Find todo
+@token_required
+def delete_todo(current_user, todo_id):
     todo = Todo.query.get_or_404(todo_id)
 
-    # Step 3: Check ownership
     if todo.user_id != current_user.id:
         return jsonify({'error': 'Not authorized'}), 403
 
-    # Step 4: Delete todo
     db.session.delete(todo)
     db.session.commit()
 
@@ -172,7 +146,7 @@ def delete_todo(todo_id):
 
 if __name__ == '__main__':
     print("\n" + "="*50)
-    print("  Part 8: Homework - Add Priority Feature")
+    print("  Part 8: SOLUTION")
     print("  Open: http://127.0.0.1:5000")
     print("="*50 + "\n")
     app.run(debug=True)

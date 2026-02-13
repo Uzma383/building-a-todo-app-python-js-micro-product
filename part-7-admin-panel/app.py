@@ -98,7 +98,7 @@ def login():
     if not user or not verify_password(data['password'], user.password_hash):
         return jsonify({'error': 'Invalid email or password'}), 401
 
-    token = create_token(user.id)
+    token = create_token(user.id, user.is_admin)
 
     return jsonify({
         'message': 'Login successful',

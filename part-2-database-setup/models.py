@@ -1,8 +1,5 @@
 # =============================================================================
-# Part 2: Database Models
-# =============================================================================
-# Models define the structure of our database tables.
-# Each class = one table in the database.
+# Part 2: Database Models (Updated with phone field)
 # =============================================================================
 
 from flask_sqlalchemy import SQLAlchemy
@@ -13,9 +10,6 @@ db = SQLAlchemy()
 # =============================================================================
 # USER MODEL
 # =============================================================================
-# This creates a 'users' table with columns:
-# id, username, email, password_hash, is_admin
-
 class User(db.Model):
     __tablename__ = 'users'
 
@@ -23,6 +17,7 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(256), nullable=False)
+    phone = db.Column(db.String(15)) 
     is_admin = db.Column(db.Boolean, default=False)
 
     # Relationship: One user can have many todos
@@ -35,9 +30,6 @@ class User(db.Model):
 # =============================================================================
 # TODO MODEL
 # =============================================================================
-# This creates a 'todos' table with columns:
-# id, task_content, is_completed, user_id
-
 class Todo(db.Model):
     __tablename__ = 'todos'
 
@@ -54,7 +46,6 @@ class Todo(db.Model):
 # INITIALIZE DATABASE
 # =============================================================================
 def init_db(app):
-    """Connect database to Flask app and create tables."""
     db.init_app(app)
     with app.app_context():
         db.create_all()

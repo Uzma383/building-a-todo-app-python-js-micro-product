@@ -1,3 +1,5 @@
+# SOLUTION - models.py (completed)
+
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -29,25 +31,16 @@ class Todo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     task_content = db.Column(db.String(200), nullable=False)
     is_completed = db.Column(db.Boolean, default=False)
+    priority = db.Column(db.String(20), default='medium')  # ✅ NEW
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-
-    # ===========================================
-    # STEP 1: Add this line below
-    # ===========================================
-    # priority = db.Column(db.String(10), default='medium')
-    # ===========================================
 
     def to_dict(self):
         return {
             'id': self.id,
             'task_content': self.task_content,
             'is_completed': self.is_completed,
+            'priority': self.priority,
             'created_at': self.created_at.isoformat(),
-            'user_id': self.user_id,
-            # ===========================================
-            # STEP 2: Add this line below
-            # ===========================================
-            # 'priority': self.priority
-            # ===========================================
+            'user_id': self.user_id
         }
